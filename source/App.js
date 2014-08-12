@@ -41,15 +41,15 @@ enyo.kind({
 					components:[
 						{components:[
 							/**{style: "visibility: hidden;"},*/
-							{content: "\u221a", value: "sqrt("},		
+							{content: "\u221a", value: "sqrt(", ontap: "calculateTapped"},		
 							{content: "("},
 							{content: ")"},
 							{content: "C", style: "margin-right: 0;", ontap: "cancelTapped"}
 						]},
 						{components:[
-							{content: "ln", value: "ln("},
-							{content: "log", value: "log("},
-							{content: "x<sup>2</sup>", value: "^2"},
+							{content: "ln", value: "ln(", ontap: "calculateTapped"},
+							{content: "log", value: "log(", ontap: "calculateTapped"},
+							{content: "x<sup>2</sup>", value: "^2", ontap: "calculateTapped"},
 							{content: "^"},
 							//{content: "%", ontap: "percentTapped"} // TODO: make room for more buttons and fix percentTapped, or remove it
 						]},
@@ -74,7 +74,7 @@ enyo.kind({
 						{components:[
 							{content: "."},
 							{content: "0", classes: "number-button"},
-							{content: "=", ontap: "equalsTapped"},
+							{content: "=", ontap: "calculateTapped"},
 							{content: "/", style: "margin-right: 0;"}
 						]}
 					
@@ -91,8 +91,23 @@ enyo.kind({
 	formulaAppend: function(str) {
 		this.$.Formula.setContent(this.$.Formula.getContent() + str);
 	},
-	equalsTapped: function() {
-		this.$.Result.setContent(this.calculate(this.$.Formula.getContent()));
+	calculateTapped: function(inSender) {
+		str = inSender.value;
+
+		if (str === "sqrt(" || str === "ln(" || str ==="log(") 
+		{
+			this.$.Result.setContent(this.calculate(str + this.$.Formula.getContent() + ")"));
+			this.$.Formula.setContent(str + this.$.Formula.getContent() + ")");
+		}
+		else if (str === "^2")
+		{
+			this.$.Formula.setContent(this.$.Formula.getContent() + str);
+			this.$.Result.setContent(this.calculate(this.$.Formula.getContent()));
+		}
+		else
+		{
+			this.$.Result.setContent(this.calculate(this.$.Formula.getContent()));
+		}
 	},
 	calculate: function(formula) {
 		try {
@@ -110,23 +125,5 @@ enyo.kind({
 	backspaceTapped: function() {
 		var formula = this.$.Formula;
 		formula.setContent(formula.getContent().substr(0, formula.getContent().length - 1));
-	},
-	percentTapped: function() {
-		var string = this.$.Formula.getContent();
-		this.$.Result.setContent("");
-
-		if (string.length <= 1){
-			string = ".0" + string;
-			this.$.Formula.setContent(string);
-		}else{
-			var res = string.slice(0,string.length -2 );
-			if(isNaN(string.substr(-2,2)) === true){
-				var lastNum = string.substr(-1,1);
-				this.$.Formula.setContent(string.slice(0,string.length -1 ) + ".0" + lastNum);
-				return;
-			}				// if last two digits are not NaN
-			this.$.Formula.setContent(res + "." + string.substr(-2,2));
-		}
-		
-	},
+	}
 });
